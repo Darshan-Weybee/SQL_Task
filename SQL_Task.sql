@@ -69,48 +69,64 @@ values
 
 
 ---------------------------------------------------------------
---3
-select * from Departments;
+--3. Write a query to determine the structure of the table 'DEPARTMENTS'
+sp_help Employee;
 
---4
+SELECT TABLE_NAME, COLUMN_NAME  FROM information_schema.columns   
+WHERE table_name = 'Employee';
+
+SELECT * FROM information_schema.columns   
+WHERE table_name = 'Employee';
+
+
+--4. Write a query to determine the unique Job IDs from the EMPLOYEES table.
 select distinct Job_ID 
 from Employee;
 
---5
-select Employee_ID, Last_Name, Salary as OldSalary, (salary*15.5)/100+Salary as NewSalary, (salary*15.5)/100 as Increment 
+
+--5. Write a query to display the employee number, lastname, salary (oldsalary), salary increased by 15.5% name it has NewSalary and subtract the (NewSalary from OldSalary) name the column as Increment.
+select Employee_ID, Last_Name, Salary as OldSalary, (salary*15.5)/100+Salary as NewSalary, ((salary*15.5)/100+Salary - Salary)as Increment 
 from Employee;
 
---6
-select min(Salary) 'min-salary', max(Salary) 'max(e.salary)', sum(Salary) 'sumOfSalary', avg(Salary) 'avgSalary' 
-from Employee 
-group by Job_ID;
 
---7
+--6. Write a query to display the minimum, maximum, sum and average salary for each job type.
+select min(Salary) 'min-salary', max(Salary) 'max(e.salary)', sum(Salary) 'sumOfSalary', avg(Salary) 'avgSalary', j.Job_Title JobType 
+from Employee e 
+inner join Jobs j
+on e.Job_ID = j.Job_ID
+group by j.Job_Title;
+
+
+--7. The HR department needs to find the names and hire dates of all employees who were hired before their managers, along with their managers’ names and hire dates.
 select e.First_Name EmpName, e.Hire_Date EmpHireDate, m.First_Name ManagerName, m.Hire_Date ManagerHireDate from Employee e, Employee m
 where e.Manager_ID  = m.Employee_ID and e.Hire_Date<m.Hire_Date;
 
 
---8
+--8. Create a report for the HR department that displays employee last names, department numbers, and all the employees who work in the same department as a given employee.
 create view report as
 select e.First_Name, e.Department_ID, m.First_Name Colleuges from Employee e, Employee m
 where e.Department_ID = m.Department_ID and e.Employee_ID != m.Employee_ID;
 
---9
-select min(Salary) 'Minimum', max(Salary) 'Maximum', sum(Salary) 'Sum', round(avg(Salary),0) 'Average' 
-from Employee; 
 
---10
+--9. Find the highest, lowest, sum, and average salary of all employees. Label the columns Maximum, Minimum, Sum, and Average, respectively. Round your results to the nearest whole number.
+select round(min(Salary), 0) 'Minimum', round(max(Salary), 0) 'Maximum', round(sum(Salary), 0) 'Sum', round(avg(Salary),0) 'Average' 
+from Employee e
+
+
+--10. Create a report that displays list of employees whose salary is more than the salary of any employee from department 60
 create view report as
 select First_Name, Last_Name 
 from Employee
 where Salary > (select max(salary) from Employee where Department_ID = 'D5');
 
---11
+
+--11. Create a report that displays last name and salary of every employee who reports to King(Use any manager name instead of King).
 create view report as
 select Last_Name, Salary from Employee
 where Manager_ID = (select Employee_ID from Employee where First_Name = 'Mike');
 
---12
+
+--12. Write a query to display the list of department IDs for departments that do not contain the job Id ST_CLERK(Add this job ST_CLERK to Job table). Use SET Operator for this query
 select Department_ID from Employee
 except
 select Department_ID from Employee e
@@ -118,7 +134,8 @@ inner join Jobs j
 on e.Job_ID = j.Job_ID
 where j.Job_Title = ' ST_CLERK';
 
---13
+
+--13. Write a query to display the list of employees who work in department 50 and 80. Show employee Id, job Id and department Id by using set operators. - Add 50 and 80 department Id to department table
 select Employee_ID, Job_ID,  Department_ID from Employee
 except
 select Employee_ID, Job_ID,  Department_ID from Employee where Department_ID != '50' and Department_ID != '80';
